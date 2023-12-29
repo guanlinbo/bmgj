@@ -13,7 +13,7 @@ $\color{red}{注意，本程序只是辅助报名讲座工具，并不能百分�
 
 ### 软件程序
 
-- 软件下载链接：https://wwzv.lanzouu.com/i9oWO1i9u05e
+- 软件下载链接：https://wwzv.lanzouu.com/i779s1j9wqud
 
 解压缩 然后双击`bmgj.exe`文件
 
