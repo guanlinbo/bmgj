@@ -5,6 +5,8 @@
 #include<QTimer>
 #include"networkhandel.h"
 #include <QThread>
+#include "multiplechoice.h"
+#include "settings.h"
 namespace Ui {
 class waitPost;
 }
@@ -24,6 +26,9 @@ public slots:
     void handelNetData(QString jsonData);
     void setAutoRegistrationStatus(int status);
     void setParityRequirement(int status);
+
+    bool isNum(QString str);
+    bool isInt(QString str);
 private:
     Ui::waitPost *ui;
     QTimer* myTimer;
@@ -41,6 +46,7 @@ private:
     int parityRequirement;          //0无要求 1奇数 2偶数
     bool isGetCount;
     bool programFilling;
+    settings m_set;
 };
 
 #endif // WAITPOST_H

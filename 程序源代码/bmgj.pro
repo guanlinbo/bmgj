@@ -10,20 +10,26 @@ CONFIG += c++17
 
 SOURCES += \
     choosealecture.cpp \
+    llcombobox.cpp \
     log4q.cpp \
     login.cpp \
     main.cpp \
     mainwindow.cpp \
+    multiplechoice.cpp \
     networkhandel.cpp \
+    settings.cpp \
     usesettings.cpp \
     waitpost.cpp
 
 HEADERS += \
     choosealecture.h \
+    llcombobox.h \
     log4q.h \
     login.h \
     mainwindow.h \
+    multiplechoice.h \
     networkhandel.h \
+    settings.h \
     usesettings.h \
     waitpost.h
 
@@ -31,6 +37,7 @@ FORMS += \
     choosealecture.ui \
     login.ui \
     mainwindow.ui \
+    multiplechoice.ui \
     usesettings.ui \
     waitpost.ui
 

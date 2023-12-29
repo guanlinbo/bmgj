@@ -1,6 +1,7 @@
 #ifndef USESETTINGS_H
 #define USESETTINGS_H
 
+#include "qsettings.h"
 #include <QWidget>
 
 namespace Ui {
@@ -25,8 +26,11 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_checkBox_2_stateChanged(int arg1);
+
 private:
     Ui::useSettings *ui;
+    QSettings *settings;
 };
 
 #endif // USESETTINGS_H

@@ -1,6 +1,7 @@
 #include "choosealecture.h"
 #include "ui_choosealecture.h"
 #include<QMessageBox>
+#include "settings.h"
 chooseALecture::chooseALecture(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::chooseALecture)
@@ -153,22 +154,28 @@ void chooseALecture::handelNetData(QString jsonData)
         }
         else
         {
+            settings set;
             int user_edit = jsonObj["data"].toObject()["user_edit"].toInt();
             QMessageBox msgBox;
 //            qDebug() << "user_edit:" << user_edit;
             if(user_edit == 0 || user_edit == 2)
             {
-                if(autoRegistration == 2)
-                    msgBox.setText("该讲座允许报名后修改信息且你已设置软件为报名优先(程序默认)，如缺少信息将题目当作内容填入，选择、多选择、下拉框类型将选择第一个报名！如果不同意的话请在软件设置界面取消勾选！");
-                else
-                    msgBox.setText("该讲座允许报名后修改信息你不允许程序自动帮你填充数据，如缺少信息将弹出输入界面由你输入数据！如允许程序帮你填充数据的话请在软件设置界面勾选！");
+                if(set.isshowinfo())
+                {
+                    if(set.isautoregistration())
+                        msgBox.setText("该讲座允许报名后修改信息且你已设置软件为报名优先(程序默认)，如缺少信息将题目当作内容填入，选择、多选择、下拉框类型将选择第一个报名！如果不同意的话请在软件设置界面取消勾选！");
+                    else
+                        msgBox.setText("该讲座允许报名后修改信息你不允许程序自动帮你填充数据，如缺少信息将弹出输入界面由你输入数据！如允许程序帮你填充数据的话请在软件设置界面勾选！");
+                }
             }
             else
             {
-                msgBox.setText("该讲座不允许报名后修改信息，如缺少信息将弹出输入界面由你输入数据!");
+                if(set.isshowinfo())
+                    msgBox.setText("该讲座不允许报名后修改信息，如缺少信息将弹出输入界面由你输入数据!");
                 emit autoRegistrationSignal(0);
             }
-            msgBox.exec();
+            if(set.isshowinfo())
+                msgBox.exec();
             emit switchWidget();
             emit finished(m_access_token,eidList[ui->comboBox->currentIndex()],startTimeList[ui->comboBox->currentIndex()],m_data,user_edit);
         }

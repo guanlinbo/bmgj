@@ -5,6 +5,7 @@
 #include<QMessageBox>
 #include <synchapi.h>
 #include<QInputDialog>
+#include"settings.h"
 waitPost::waitPost(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::waitPost)
@@ -95,6 +96,10 @@ void waitPost::StartGrabbing(QString token, QString eid, QString time, QVector<Q
 
 void waitPost::handelNetData(QString jsonData)
 {
+    if(m_set.isautoregistration())
+        autoRegistration = true;
+    else
+        autoRegistration = false;
 //    //解析json字符串
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData.toUtf8());
     QJsonObject jsonObj = jsonDoc.object();
@@ -111,7 +116,8 @@ void waitPost::handelNetData(QString jsonData)
         ui->label_7->setText("报名成功! " + end_str);
         if(programFilling == true)
         {
-            QMessageBox::critical(this, tr("告警信息"),  tr("请注意，本次报名数据有部分为程序帮你填写，请前往小程序核对并修改信息！"),
+            if(m_set.isshowinfo())
+                QMessageBox::critical(this, tr("告警信息"),  tr("请注意，本次报名数据有部分为程序帮你填写，请前往小程序核对并修改信息！"),
                                                     QMessageBox::Default);
         }
         isSuccess = true;
@@ -194,7 +200,7 @@ void waitPost::handelNetData(QString jsonData)
                             else
                             {
                                 QString sName = QInputDialog::getText(this,
-                                                                      "QInputdialog_Name",
+                                                                      "输入界面",
                                                                       QString("请输入 %1").arg(field_name),
                                                                       QLineEdit::Normal,
                                                                       "张三",
@@ -227,6 +233,8 @@ void waitPost::handelNetData(QString jsonData)
                             else
                                 str = new_options.at(j).toString();
                             tLi << str;
+                            if(isNum(str))
+                                goto nameGoto;
                             if(valueList.filter(str).count() != 0)
                             {
                                 flag = true;
@@ -234,6 +242,7 @@ void waitPost::handelNetData(QString jsonData)
                                 jsonArray.append(infoobj);
                                 break;
                             }
+                            nameGoto:
                             for(int j =0;j< valueList.count();++j)
                             {
                                 if (str.contains(valueList[j]))
@@ -262,7 +271,7 @@ void waitPost::handelNetData(QString jsonData)
                             else
                             {
                                 QString sGender = QInputDialog::getItem(this,
-                                    "QInputDialog_Gender",
+                                    "输入界面",
                                     QString("请选择 %1").arg(field_name),
                                                                  tLi,
                                                              0,
@@ -278,31 +287,73 @@ void waitPost::handelNetData(QString jsonData)
                             }
                         }
                     }
-    //                else if(field_type == 10)
-    //                {
-    //                    QJsonArray new_options = obj["options"].toArray();
-    //                    for(int i = 0;i< new_options.count();++i)
-    //                    {
-    //                        QString str = new_options.at(i).toString();
-    //                        if(valueList.filter(str).count() != 0)
-    //                        {
-    //                            flag = true;
-    //                            infoobj.insert("field_value",str);
-    //                            jsonArray.append(infoobj);
-    //                            break;
-    //                        }
-    //                        for(int i =0;i< valueList.count();++i)
-    //                        {
-    //                            if (str.contains(valueList[i]))
-    //                            {
-    //                                flag = true;
-    //                                infoobj.insert("field_value",str);
-    //                                jsonArray.append(infoobj);
-    //                                break;
-    //                            }
-    //                        }
-    //                    }
-    //                }
+                    else if(type_text == "多项选择" || field_type == 5)
+                    {
+                        QJsonArray fieldAry;
+                        QJsonArray new_fieldAry;
+                        QJsonArray valueAry;
+                        if(autoRegistration == true)
+                        {
+                            QString str;
+                            QString key;
+                            str = obj["new_options"].toArray().at(0).toObject()["value"].toString();
+                            key = obj["new_options"].toArray().at(0).toObject()["key"].toString();
+                            programFilling = true;
+                            flag = true;
+                            fieldAry.append(str);
+                            new_fieldAry.append(key);
+                        }
+                        else
+                        {
+                            QJsonArray mcary = obj["new_options"].toArray();
+                            multipleChoice* mc = new multipleChoice;
+                            mc->setModal(true);
+                            QMap<QString,QString>map;
+                            for(int i =0;i< mcary.count();++i)
+                            {
+                                mc->addDataItem(mcary.at(i).toObject()["value"].toString());
+                                map[mcary.at(i).toObject()["value"].toString()] = mcary.at(i).toObject()["key"].toString();
+                            }
+                            QStringList selectlist;
+                            selectlist << mcary.at(0).toObject()["value"].toString();
+                            mc->setSelectedData(selectlist);
+                            connect(mc,&multipleChoice::selectedDataTextSignal,this,[&](QStringList list){
+                                for(int i = 0;i< list.count();++i)
+                                {
+                                    fieldAry.append(list.at(i));
+                                    new_fieldAry.append(map[list.at(i)]);
+                                }
+                                mc->hide();
+                                mc->close();
+                            });
+                            mc->setWindowTitle("多项选择  请选择:" + field_name);
+                            // mc->showmcPopup();
+                            mc->exec();
+                            if(fieldAry.count() == 0)
+                                flag = false;
+                            else
+                                flag = true;
+                            // QString sGender = QInputDialog::getItem(this,
+                            //                                         "输入界面",
+                            //                                         QString("请选择 %1").arg(field_name),
+                            //                                         tLi,
+                            //                                         0,
+                            //                                         false,
+                            //                                         &bOk);
+                            // if (bOk && !sGender.isEmpty())
+                            // {
+                            //     //                        ui->label_Gender->setText(sGender);
+                            //     flag = true;
+                            //     infoobj.insert("field_value",sGender);
+                            //     jsonArray.append(infoobj);
+                            // }
+
+                        }
+
+                        infoobj.insert("field_value",fieldAry);
+                        infoobj.insert("new_field_value",new_fieldAry);
+                        jsonArray.append(infoobj);
+                    }
                     if(flag == false)
                     {
                         Success = false;
@@ -364,14 +415,14 @@ void waitPost::handelNetData(QString jsonData)
 
 void waitPost::setAutoRegistrationStatus(int status)
 {
-    if(2 == status)
-    {
-        autoRegistration = true;
-    }
-    else
-    {
-        autoRegistration = false;
-    }
+    // if(2 == status)
+    // {
+    //     autoRegistration = true;
+    // }
+    // else
+    // {
+    //     autoRegistration = false;
+    // }
 }
 
 void waitPost::setParityRequirement(int status)
@@ -379,4 +430,21 @@ void waitPost::setParityRequirement(int status)
     if(status != 0)
         isGetCount = true;
     parityRequirement = status;
+}
+
+
+// 判断是否为数字
+bool waitPost::isNum(QString str)
+{
+    bool isNum;
+    str.toDouble(&isNum);
+    return isNum;
+}
+
+// 判断是否为整数
+bool waitPost::isInt(QString str)
+{
+    bool isInt;
+    str.toInt(&isInt);
+    return isInt;
 }

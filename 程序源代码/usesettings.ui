@@ -39,7 +39,7 @@ font: 700 12pt &quot;Microsoft YaHei UI&quot;;</string>
      <x>130</x>
      <y>160</y>
      <width>297</width>
-     <height>85</height>
+     <height>111</height>
     </rect>
    </property>
    <property name="title">
@@ -52,6 +52,16 @@ font: 700 12pt &quot;Microsoft YaHei UI&quot;;</string>
        <widget class="QCheckBox" name="checkBox">
         <property name="text">
          <string>报名优先，若信息缺失，允许程序帮你填写信息</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_2">
+        <property name="text">
+         <string>显示提示信息</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </item>

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include<QBuffer>
 #include<QGraphicsDropShadowEffect>
+#include<QSettings>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
